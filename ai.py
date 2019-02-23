@@ -132,4 +132,19 @@ class ReplayMemory(object):
     # by the push function.
     self.memory = []
 
+  # this functin will be used to push a new state to the memory 
+  # object variable and will make sure that this memory variable  is
+  # containing 100 events at maximum ( depending on the capacity variable )
+  #
+  # the event that we are pushing to the memeory is containing four elements
+  # (last state, new state, last action, last reward obtained.)
+  # and still I don't know why exaclty we need to save this specific values
+  def push(self, event):
+    self.memory.append(event);
+    if len(self.memory) > self.capacity :
+      # the del function in paython is used to delete an object
+      # and since almost everything in python is a variable, we can
+      # use the del keyword to delete an array element.
+      del self.memory[0]
+  
   
