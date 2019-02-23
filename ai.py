@@ -97,3 +97,39 @@ class Network(nn.Module):
     # layers neurons values.
     qValues = self.full_connection2(x)
     return qValues
+  
+# implementing the experience replay in our neural network
+# 
+# a small reminder about experience replay, if the agent is going
+# from a state to another state and the two states are co-related
+# he will not learn any thnng, so we need to implement the expereince 
+# replay to train the agent to understant long-term co-relations
+# 
+# how it works ? instead of considering only one state at time t
+# , we are going to consider more in the past so our series of events
+# will not only be st and st+1 but it will be the last 100 states 
+# that happened in the past ex: st-100 st-99 up to st -1 and st, and 
+# we put all of those to the memory so we have a logn term memory 
+# instead of an instant memory
+# 
+# once we create this memory of the last 100 events we will take 
+# some random batches of these transitions to make our next update
+# which is our next move (action)
+# 
+# the object passed this inicates that this class is inhereting
+# the class object just like what java does, bnut in java 
+# you don't have to tell it and it does it by default, i searched
+# and found out that this way was used in the past and you don't 
+# have to use it in python versions > 2.2.
+class ReplayMemory(object):
+  def __init__(self, capacity):
+    # is the maximum number of events ( states ) that
+    # we want to have in out memory and we can experement with it 
+    # by increasing or decreasing the number when calling this funcion.
+    self.capacity = capacity
+    # is the list containing the values of the last 100 events ( depending
+    # on the capacity that you put ), and it events will be added to it 
+    # by the push function.
+    self.memory = []
+
+  

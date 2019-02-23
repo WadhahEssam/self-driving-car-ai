@@ -23,9 +23,11 @@ class Network(nn.Module):
         x = F.relu(self.full_conncection1(state))
         qValues = self.full_conncection2(x)
         return qValues
-    
-
         
 # Implementing Experience Replay
+class ReplayMemory(object):
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.memory = []
 
 # Implementing Deep Q Learning
