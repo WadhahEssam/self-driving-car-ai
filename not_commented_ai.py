@@ -18,6 +18,13 @@ class Network(nn.Module):
         self.nb_actions = nb_actions
         self.full_conncection1 = nn.Linear(input_size, 30)
         self.full_conncection2 = nn.Linear(30, nb_actions)
+    
+    def forward(self, state):
+        x = F.relu(self.full_conncection1(state))
+        qValues = self.full_conncection2(x)
+        return qValues
+    
+
         
 # Implementing Experience Replay
 

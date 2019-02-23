@@ -15,8 +15,8 @@ import torch
 # should take.
 import torch.nn as nn
 # giving a shortcut for the funcational module inside the
-# nn module because it contains the neural network functiuons
-# that we need to use.
+# nn module because it contains allthe neural network 
+# functiuons that we need to use.
 import torch.nn.functional as F
 # importing the torch optimizer to perform the stochastic 
 # gradient descent.
@@ -72,3 +72,28 @@ class Network(nn.Module):
     # hidden layer and the output layer 
     self.full_connection1 = nn.Linear(input_size, 30)
     self.full_connection2 = nn.Linear(30, nb_actions)
+
+  # this is the functin that does the forward propagation, and takes 
+  # the state ( which is the five input values ) and will return
+  # the three output actions or in another word it will return the
+  # three Q values that will be used as an output for the our neural 
+  # netowrk.
+  def forward(self, state):
+    # first we need to activate the hidden neurons, by getting the 
+    # full connection 1 and applying a rectifier function on them
+    #
+    # F.relu is the rectifier function and we pass to it a full 
+    # connection containing with its left side values and it applies
+    # the rectifier fucntion to it and it returns the values of the
+    # left side neurons of the layer ( in our case the values of the 
+    # hidden layer neurons ).
+    # 
+    # SideNote : ( state != input_size ) because the first one is the 
+    # actual values and the second one is only the number of inputs
+    # we are expecting.
+    x = F.relu(self.full_connection1(state))
+    # now in order to get the values of the output layer we call the
+    # second full connection and passing it the values of the hidden 
+    # layers neurons values.
+    qValues = self.full_connection2(x)
+    return qValues
