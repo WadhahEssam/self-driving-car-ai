@@ -32,7 +32,11 @@ class ReplayMemory(object):
 
     def push(self, event):
         self.memory.append(event)
-        if len(self.memory) > capacity :
+        if len(self.memory) > self.capacity :
             del self.memory[0]
+    
+    def sample(self, batchSize):
+        sample = zip(*random.sample(self.memory, batchSize))
+        return map(lambda x: Variable(torch.cat(x, 0)), sample)
 
 # Implementing Deep Q Learning

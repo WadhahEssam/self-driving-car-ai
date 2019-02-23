@@ -25,6 +25,8 @@ import torch.optim as optim
 # it later in the course, and it will be used to convert something
 # to something else.
 import torch.autograd
+# the Variable function is a funcation that will convert a tensor 
+# to a pytorch variable that contains the tensor and the gradient
 from torch.autograd import Variable
 
 # creating the Network class that is inhereting the nn.Module Class
@@ -146,5 +148,58 @@ class ReplayMemory(object):
       # and since almost everything in python is a variable, we can
       # use the del keyword to delete an array element.
       del self.memory[0]
+  
+  # this function will  select a random sample from the memory and 
+  # will return this random sample
+  # 
+  # the batchSize is going to be the number of events that we are going
+  # to take from the memroy and return it
+  #
+  # remember that this function will return a one one dimentional list
+  # that contains batches that are aligned in a way that pytorch can 
+  # understand which values are related to the same time t.
+  def sample(self, batchSize):
+    # random.sample : it takes a random batch from a list and this
+    # random batch is of size batchSize
+    # 
+    # zip (*) : it reshapes the array, collectes the first element of 
+    # every array and put it in one array, and the same for other arrays
+    # ex : array = [[1,2],[a,b]] , zip(*array) = [[1,a], [2,b]]
+    # and we do this so we can wrap this array into a pytorch variable
+    # which contains both a tensor and a gradient, and a tensor is a
+    # multidimensional matrix that contains elements of the same data type
+    # and that is why we do zip the array we have so we can create multiable
+    # arrayes that contain the same data type..
+    #
+    # after zipping the batching we are going to put every data set into 
+    # one pytorch variable, which each one will get a gradient so we  
+    # can eventually diferentiate between each of them
+    #
+    # if you want to read more about tensors you can check this 
+    # in the pytorch documentation https://pytorch.org/docs/master/tensors.html
+    # and in the test.py file I made an example of how it works
+    #
+    # the star operator in python does a similar jop to the ( ... ) in 
+    # java, you send multidimenstional array, and the function will 
+    # take every element inside it and will assign it to one value
+    # of the arguments. see example 4 in test.py 
+    samples = zip(*random.sample(self.memory, batchSize))
+    # torch.cat is using to cancat arrays together and alignthem 
+    # according to a specified element, in our case the element
+    # is 0, so it will align them according to the first element
+    # visit the link and search for cat to learn more.
+    # https://pytorch.org/docs/stable/torch.html
+    #
+    # the Variable function returns a torch variarble that contains
+    # both tensors and gradient, 
+    # x : is one of the samples which is an array containing
+    # elements witht the same data type
+    #
+    # the reason to concat is for us later to deferentiat which
+    # value this relates to, when we apply the stochastic graident
+    # descent to update the weigths
+    return map(lambda x: Variable(torch.cat(x, 0), samples))
+
+    
   
   
