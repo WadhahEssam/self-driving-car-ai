@@ -252,6 +252,8 @@ class Dqn():
     #
     # the unsqueeze function adds an a dimension for the Batch to be inserted
     # at the first position of the tensor 
+    #
+    # I added more explaination in the text document of this course
     self.last_state = torch.Tensor(input_size).unsqueeze(0)
     # actions will be inside the range [ -1, 0, 1 ] and then those actions
     # will be converted to be corrosponging to the oreintation of the car
@@ -260,7 +262,58 @@ class Dqn():
     # the reward is a floating number that is again between -1 and +1
     self.last_reward = 0
 
-    
+  # this fucntion is the function that will make the decistion of the car
+  # after each step
+  # so remember that the selected action will be one of the three Q values
+  # that we get from the output of the neural network which will recieve 
+  # a state in order to pass it to the hidden layer and then to the output
+  # layer, and finally we will feed the q values to a softmax function that
+  # will choose one of the available q values.
+  #
+  # state : reperesents the current state of the env so we can pass it to the 
+  # self.model variable, and this state should be converted as a tensor 
+  # variable that has a batch cuz as we said that this is how pytorch acceps
+  # the state variables 
+  def select_action(self, state):
+    # applying the softmax function to the q values we get from the neural 
+    # network, remember that softmax selectes the final value depending on
+    # the propabilities so if the qValues are [0.1 , 0.7, 0.2] , there will
+    # be a 70% chance that the output of the softmax function is going to be
+    # the second action, there are other functions that takes the hieghest 
+    # values but this means that you don't want your agent to keep exploring 
+    # the environment 
+    #
+    # we pass the state tensor to the sotfmax afterwrapping it with a torch
+    # Variable class
+    # 
+    # we pass it a volatile argument with a value of true to tell the nn 
+    # module that we don't want the gradient on the graph of all the computations
+    # of the nn module, which means that you will not be including the gradient
+    # of the state into the graph, and this will save you some memory
+    # 
+    # Tempreture parameter : this parameter is used to heigher the chanse of
+    # getting the most sure action for example multiplay this [1,2,3] by 7
+    # and see the result propability and you will get it, in this project 
+    # the tempreture parameter will help you to smooth the movement of the 
+    # car which will return in a more realistic movement rather that the 
+    # insect like movement that we have
+    #
+    # where is the forward function, the forward function is not directly
+    # accessed otherwise it is called by the nn module when you call it with
+    # the actual states that you have > more discussion on that here
+    # https://www.udemy.com/artificial-intelligence-az/learn/v4/questions/3337464
+    props = F.softmax(self.model(Variable(state, volatile = True))*7)
+    # the multinomial function is related to numby and it gives you a random
+    # draw from the distribution that is returned by the softmax fucntion
+    action = props.multinomial()
+    # this will come with a batch so in order to take the action out of the
+    # btach, we will need to write the following line, and it will return 
+    # the action that we want to take which is 0, 1, or 2
+    return action.data[0,0]
+
+
+
+
     
 
     

@@ -50,5 +50,10 @@ class Dql():
         self.last_state = torch.Tensor(input_size).unsqueeze(0)
         self.last_action = 0
         self.last_reward = 0
+    
+    def select_action(self, state):
+        props = F.softmax(Variable(self.model(state, volatile = True))*7)
+        action = props.multinomial()
+        return action.data[0,0]
 
         
