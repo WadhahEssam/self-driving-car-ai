@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.autograd
+import torch.optim as optim
 from torch.autograd import Variable
 
 # Creating the architecture of the Neural Network
@@ -35,8 +36,19 @@ class ReplayMemory(object):
         if len(self.memory) > self.capacity :
             del self.memory[0]
     
-    def sample(self, batchSize):
-        sample = zip(*random.sample(self.memory, batchSize))
+    def sample(self, batch_size):
+        sample = zip(*random.sample(self.memory, batch_size))
         return map(lambda x: Variable(torch.cat(x, 0)), sample)
 
 # Implementing Deep Q Learning
+class Dql():
+    def __init__(self, input_size, nb_actions, gamma):
+        self.gamma = gamma
+        self.model = Network(input_size, nb_actions)
+        self.memory = ReplayMemory(100)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=0.001)
+        self.last_state = torch.Tensor(input_size).unsqueeze(0)
+        self.last_action = 0
+        self.last_reward = 0
+
+        

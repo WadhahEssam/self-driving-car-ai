@@ -158,7 +158,7 @@ class ReplayMemory(object):
   # remember that this function will return a one one dimentional list
   # that contains batches that are aligned in a way that pytorch can 
   # understand which values are related to the same time t.
-  def sample(self, batchSize):
+  def sample(self, batch_size):
     # random.sample : it takes a random batch from a list and this
     # random batch is of size batchSize
     # 
@@ -183,7 +183,7 @@ class ReplayMemory(object):
     # java, you send multidimenstional array, and the function will 
     # take every element inside it and will assign it to one value
     # of the arguments. see example 4 in test.py 
-    samples = zip(*random.sample(self.memory, batchSize))
+    samples = zip(*random.sample(self.memory, batch_size))
     # torch.cat is using to cancat arrays together and alignthem 
     # according to a specified element, in our case the element
     # is 0, so it will align them according to the first element
@@ -199,6 +199,69 @@ class ReplayMemory(object):
     # value this relates to, when we apply the stochastic graident
     # descent to update the weigths
     return map(lambda x: Variable(torch.cat(x, 0), samples))
+
+# The dee q learning class which is the main class that we are 
+# going to be implementing and the we will define all the above 
+# classes inside this class
+class Dqn():
+  # input_size and nb_actions weill be passed to consturct the
+  # network object, and the gamma parameter is used in the bellman
+  def __init__(self, input_size, nb_actions, gamma):
+    self.gamma = gamma
+    # this reward_window is going to keep track of the last 100
+    # rewards he got throw the past time 
+    self.reward_window = []
+    # creting our neural network fot the deep q learning
+    self.model = Network(input_size, nb_actions)
+    # an object of the replay memory class, and we can pass the 
+    # capacity from the constructor parameters but we did this way
+    self.memory = ReplayMemory(100)
+    # creating the optimizer, inside the optim object there are many
+    # optimizers and they are all good and each one is used for a 
+    # specific porpuse, and we are going to be using the adam 
+    # algorithm optimizer, maybe later I can try the rmsprop,
+    #
+    # then in order to connect the adam parameter to our neural
+    # network we pass the model (our neural network ) parameters
+    # to the Adam algorithm 
+    #
+    # lr : is the learning rate, always try not to make it a large 
+    # number because the agent will not learn properly
+    #
+    # remember that the optimizer is now an object of the adam class
+    #
+    # note that the model.parameters is only available on the network
+    # class because it inherents the nn.Module class, and this function
+    # returns an iterator just like what the Adam optimizer is accepting
+    self.optimizer = optim.Adam(self.model.parameters(), lr = 0.001)
+    # this attribute will represent our last state, remember that the last
+    # state is a vector of 5 values/dimensions ( the three signals, and 
+    # orientation ), and since we are working with pytorch so this last
+    # state needs to be a torch tensor ( a tensor is a multi-dimenstioal array
+    # of values that has the same type ), so our last state is going to be
+    # taking place as one array/dimension inside this multidimenstional array
+    # and we also need to have an extra array/dimenstion that is reperesnting 
+    # the batch and this is required by pytorch and also other libraries require
+    # it too,
+    # 
+    # and it is doesn't only has to be 
+    # torch tensor, but it has to have an extera dimension which is going 
+    # to be a Batch, because the neural networks can only accept batches
+    # even in other libraries so we also have to create this fake extra 
+    # dimension that corrosponds to the batch
+    #
+    # the unsqueeze function adds an a dimension for the Batch to be inserted
+    # at the first position of the tensor 
+    self.last_state = torch.Tensor(input_size).unsqueeze(0)
+    # actions will be inside the range [ -1, 0, 1 ] and then those actions
+    # will be converted to be corrosponging to the oreintation of the car
+    # which are in the range of [ -20, 0, 20 ], and we initialize it to 0
+    self.last_action = 0
+    # the reward is a floating number that is again between -1 and +1
+    self.last_reward = 0
+
+    
+    
 
     
   

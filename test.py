@@ -29,4 +29,9 @@
 # list=[[1, 2, 3, 4], ['a', 'b', 'c', 'd']]
 # functionA(*list) 
 
-
+# 5) sequeeze exmple 
+# import torch 
+# x = torch.Tensor(5)
+# x.unsqueeze(0)
+# x.unsqueeze(0)
+# print(x)
