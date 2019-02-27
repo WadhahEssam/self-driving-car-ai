@@ -233,6 +233,9 @@ class Dqn():
     # note that the model.parameters is only available on the network
     # class because it inherents the nn.Module class, and this function
     # returns an iterator just like what the Adam optimizer is accepting
+    # 
+    # the job of the optimizer is to take the loss that we will calculate
+    # and then it will update all the weights of the neural network
     self.optimizer = optim.Adam(self.model.parameters(), lr = 0.001)
     # this attribute will represent our last state, remember that the last
     # state is a vector of 5 values/dimensions ( the three signals, and 
@@ -310,6 +313,57 @@ class Dqn():
     # btach, we will need to write the following line, and it will return 
     # the action that we want to take which is 0, 1, or 2
     return action.data[0,0]
+
+  # training the neural network process :
+  # forward propagation > get output > get target > compar output with target 
+  # to compute the last error > backpropagate the last error to the network, 
+  # and using schotastic gradient descent to update the wights of the network
+  # according to how much they contributed to the last error
+  #
+  # batchstate is going to be the output of the sample function that is in the
+  # Replay memory state.
+  #
+  # batch_state : is the variable that we got from the sample function in the 
+  # replay memory class which represents 100 random state samples wraped in a
+  # batch.
+  #
+  # the batch_next_state : is the actual state that you became in after doing 
+  # the action, because this function is actually going to be played after the 
+  # action has been played.
+  def learn(self, batch_state, batch_next_state, batch_reward, batch_action):
+    # this will return the output of the possiable actions 0, 1, 2 but we are
+    # only interested on the actions that were actually taken, and that's why 
+    # we chained the gather function along with one and the batch action.
+    # but notice that we added a fake extra dimenstion to the batch_state in 
+    # the replay memory class, so we need to add this dimention to the batch 
+    # action also, and we put one and not zero beacuse zero corrosponds to the
+    # the state and one corrosponds to the actions,
+    # also you don't need the output to be in the form of a batch so you will 
+    # need to squeeze it and return 
+    outputs = self.model(batch_state).gather(1, batch_action.unsqueez(1)).squeeze(1) 
+    # i don't know why is this called the outputs because this is only one output
+    # which is the real output that we will compare with the previous ouput
+    next_outputs = self.model(batch_next_state).detach().max(1)[0]
+    # this is exaclty like what the equation is presenting
+    target = self.gamma*next_outputs + batch_reward
+    # td reperesents the temporal deference loss and I talked about that in
+    # the text document, and in order to calculate this we will use a function
+    # and there are others but the instructor for somereason that I don't know 
+    # he has chosen this one to advised that we should use it too.
+    td_loss = F.smooth_l1_loss(outputs, target)
+    # back propagating the loss to the network in order to get update the wights 
+    # and this is all done by the optimizer that we created and attached to the 
+    # Dqn class which is the Adam optimaizer 
+    #
+    # you have to reinitialize the optimizer on every iteration of the loop 
+    # which is the job of the zero_grad() function
+    self.optimizer.zero_grad()
+    # the job of the function retain variables is to free some memory and this 
+    # will improve the backward propagation cuz you are going to go several times
+    # on the loss 
+    td_loss.backword(retain_variables = True)
+    # here is the line that update the weights of the neural netwok
+    self.optimizer.step()
 
 
 
