@@ -365,7 +365,31 @@ class Dqn():
     # here is the line that update the weights of the neural netwok
     self.optimizer.step()
 
-
+  # the update function updates everything that needs to be updated as long as the 
+  # AI has reached a new state.
+  # things we need to update : last action > action that was just played, also the
+  # last state becomes the state that was just played, and the last reward variable
+  # also becomes the reward that we get.
+  # it is important to know that this function is your interface to the outside world
+  # because it takes the last reward and the last signal and it provides you with 
+  # an action, so the output of this function is an action.
+  def update(self, reward, new_signal):
+    # the signal is the state and we are going to convert the signal that includes 
+    # five values into a torch tensor so it can be compatiable with torch library
+    # and again we are going to make the fake dimention for the batch
+    new_state = torch.Tensor(new_signal).float().unsqueez(0)
+    # now we need to append this trnsition to the memory to improve the experince 
+    # replay, so we pass the compo that we make to the experince replay class
+    # Notice : that this is a multi a tow prackets inside each other
+    # all the values that we save inside the memory are a torch Tensors so we need 
+    # to change the last reward and the last action into a torch tensor cuz they 
+    # are the only ones that are not updated
+    # LongTensor : is a type of tensor that contains integer numbers and that is 
+    # what we want for our action because it is going to be either 0, 1, 2
+    # we put the prackets [] because in order to change a variable into a tenosr
+    # this variable should be a list, and states as we know they are already a 
+    # variables inside a list.
+    self.memory.push((self.last_state, new_state, self.last_action, torch.LongTensor([int(self.last_action)]), torch.Tensor([self.last_reward])))
 
 
     
